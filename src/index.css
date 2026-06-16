@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #0f0d0b;
+    color: #f5e9d8;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #1a1612;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #FF6B00, #FFA500);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #FFD700, #FF6B00);
+  }
+}
+
+@layer components {
+  .btn-fire {
+    @apply bg-fire-gradient text-dark-900 font-semibold py-2.5 px-6 rounded-lg
+           transition-all duration-300 hover:shadow-fire hover:scale-105
+           active:scale-95 cursor-pointer select-none;
+  }
+
+  .btn-outline-fire {
+    @apply border border-fire-orange text-fire-orange font-semibold py-2.5 px-6 rounded-lg
+           transition-all duration-300 hover:bg-fire-orange hover:text-dark-900
+           active:scale-95 cursor-pointer select-none;
+  }
+
+  .card-product {
+    @apply bg-dark-700 border border-dark-600 rounded-xl overflow-hidden
+           transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1
+           cursor-pointer;
+  }
+
+  .input-field {
+    @apply w-full bg-dark-700 border border-dark-500 text-earth-100 placeholder-earth-400
+           rounded-lg px-4 py-2.5 text-sm
+           focus:outline-none focus:border-fire-orange focus:ring-1 focus:ring-fire-orange
+           transition-all duration-200;
+  }
+
+  .filter-chip {
+    @apply px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200
+           cursor-pointer select-none;
+  }
+
+  .filter-chip-active {
+    @apply bg-fire-orange text-dark-900 border-fire-orange;
+  }
+
+  .filter-chip-inactive {
+    @apply bg-transparent text-earth-300 border-dark-500 hover:border-fire-orange hover:text-fire-orange;
+  }
+
+  .badge {
+    @apply absolute -top-2 -right-2 bg-fire-red text-white text-xs font-bold
+           w-5 h-5 rounded-full flex items-center justify-center
+           shadow-fire-sm;
+  }
+
+  .section-title {
+    @apply font-display text-2xl font-bold text-earth-100 mb-6;
+  }
+
+  .glass-card {
+    @apply bg-dark-800 bg-opacity-80 backdrop-blur-sm border border-dark-600 rounded-2xl;
+  }
+}
+
+@layer utilities {
+  .text-fire-gradient {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 40%, #FF6B00 80%, #E63000 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-fire-gradient {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 30%, #FF6B00 65%, #E63000 100%);
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
