@@ -1,56 +1,16 @@
 // ============================================================
 // products.js – Fuego Sport
-// 12 featured products + 300 generated (100 per category)
+// 12 featured products + 60 generated (10 per category)
+// Each product has a unique, contextually appropriate image
 // ============================================================
 
-// ── Helpers ─────────────────────────────────────────────────
-const cy = (arr, i) => arr[i % arr.length];
-const rt = (i) => [4.5,4.7,4.3,4.8,4.6,4.4,4.9,4.2,4.7,4.5,4.8,4.3,4.6,4.4,4.9,4.1,4.7,4.8,4.5,4.6][i%20];
-
-// ── Image pools ──────────────────────────────────────────────
-const IMG = {
-  menShoe: [
-    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80',
-    'https://images.unsplash.com/photo-1605348532760-6753d2c43329?w=600&q=80',
-    'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=600&q=80',
-    'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=600&q=80',
-    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80',
-  ],
-  menCloth: [
-    'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&q=80',
-    'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80',
-    'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=600&q=80',
-    'https://images.unsplash.com/photo-1483721310020-03333e577078?w=600&q=80',
-    'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=600&q=80',
-  ],
-  womenShoe: [
-    'https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=600&q=80',
-    'https://images.unsplash.com/photo-1549298916-f52d724204b4?w=600&q=80',
-    'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=600&q=80',
-    'https://images.unsplash.com/photo-1605348532760-6753d2c43329?w=600&q=80',
-    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80',
-  ],
-  womenCloth: [
-    'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&q=80',
-    'https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=600&q=80',
-    'https://images.unsplash.com/photo-1483721310020-03333e577078?w=600&q=80',
-    'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=600&q=80',
-    'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&q=80',
-  ],
-  kidsShoe: [
-    'https://images.unsplash.com/photo-1556906781-9a412961a6bf?w=600&q=80',
-    'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=600&q=80',
-    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80',
-    'https://images.unsplash.com/photo-1605348532760-6753d2c43329?w=600&q=80',
-    'https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=600&q=80',
-  ],
-  kidsCloth: [
-    'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=600&q=80',
-    'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&q=80',
-    'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=600&q=80',
-    'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80',
-    'https://images.unsplash.com/photo-1483721310020-03333e577078?w=600&q=80',
-  ],
+// ── Tag color map ─────────────────────────────────────────────
+export const tagColors = {
+  'Nuevo':       'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+  'Más Vendido': 'bg-fire-orange/20 text-fire-orange border-fire-orange/30',
+  'Tendencia':   'bg-purple-500/20 text-purple-400 border-purple-500/30',
+  'Kids':        'bg-sky-500/20 text-sky-400 border-sky-500/30',
+  'Premium':     'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
 };
 
 // ── Size pools ───────────────────────────────────────────────
@@ -62,293 +22,473 @@ const SZ = {
   kidsCl:    ['S','M','L'],
 };
 
-// ── Description pools ────────────────────────────────────────
-const DESC = {
-  menShoe: [
-    'Zapatillas de alto rendimiento con tecnología de amortiguación reactiva y upper de malla transpirable ultra liviana para máxima comodidad.',
-    'Diseñadas para el corredor exigente: suela de carbono, sistema de cushioning de última generación y ajuste anatómico preciso.',
-    'Zapatillas de trail con protección reforzada, agarre extremo en terrenos difíciles y materiales técnicos resistentes al agua.',
-    'Modelo urbano de alto rendimiento con suela EVA de doble densidad y upper de knit elástico que se adapta perfectamente al pie.',
-    'Zapatillas cross-training con estabilidad lateral reforzada, suela plana flexible y materiales premium ultra respirables.',
-    'Running shoe de larga distancia con foam propulsivo en entresuela, drop de 8mm y peso ultraligero de solo 240g.',
-  ],
-  menCloth: [
-    'Prenda de entrenamiento con tejido DryFit de absorción de humedad ultra rápida. Costuras planas para mayor comodidad en ejercicio intenso.',
-    'Diseño ergonómico con cortes estratégicos para libertad de movimiento total. Tejido de alta densidad que mantiene su forma tras cada lavado.',
-    'Confeccionado en tejido técnico de compresión graduada que mejora la circulación y reduce la fatiga muscular en sesiones prolongadas.',
-    'Material cortaviento con membrana interna que protege sin agregar peso. Dobladillo ajustable y bolsillos con cierre resistente al agua.',
-    'Tejido de doble capa con interior térmico y exterior DryFit. Ideal para entrenamientos en baja temperatura o como capa intermedia.',
-    'Ultra liviano y transpirable. Paneles de malla estratégicos para máxima ventilación en las zonas de mayor calor corporal durante el ejercicio.',
-  ],
-  womenShoe: [
-    'Zapatillas femeninas con horma anatómica de mayor anchura en el antepié. Amortiguación adaptativa y upper ultra transpirable.',
-    'Diseñadas con tecnología de retorno de energía para cada pisada. Suela de goma Continental para máximo agarre en superficie mojada.',
-    'Modelo de trail con refuerzos laterales, sistema de cierre rápido y suela multidireccional de alta tracción. Resistente al agua y al desgaste.',
-    'Running shoe ligero con foam reactivo, plantilla removible OrthoLite y exterior de malla Primeknit que se adapta al movimiento del pie.',
-    'Zapatilla de gym con suela plana para yoga, pilates y levantamiento. Upper de malla flexible con soporte lateral reforzado.',
-    'Diseño premium en tonos terra con detalles en naranja fuego. Tecnología Boost en la entresuela para una experiencia de confort superior.',
-  ],
-  womenCloth: [
-    'Conjunto de yoga y fitness en tela de compresión suave de 4 vías. Top con soporte integrado y calza de cintura alta con bolsillo oculto.',
-    'Calza de compresión de cintura alta con tela opaca sin transparencias. Tecnología de compresión gradual para mejor performance y recuperación.',
-    'Campera ultraliviana con capucha plegable en el cuello. Tejido cortaviento que protege sin sofocar en días de baja temperatura.',
-    'Sports bra de soporte medio-alto con espalda cruzada y breteles ajustables. Interior de mesh que elimina la humedad y reduce el roce.',
-    'Short de running con malla interior integrada, bolsillo trasero con cierre y cintura elástica de alta sujeción sin restricciones.',
-    'Remera de entrenamiento con corte amplio y suelto, tejido de bambú mezclado con poliéster para suavidad y transpirabilidad superiores.',
-  ],
-  kidsShoe: [
-    'Zapatillas infantiles con suela flexible antideslizante y cierre fácil de velcro. Upper suave que protege sin comprimir el pie en desarrollo.',
-    'Diseño colorido y liviano con puntera reforzada. Suela de EVA que amortigua los impactos durante los juegos más activos.',
-    'Zapatilla deportiva con sistema de cierre rápido y materiales antibacteriales en el interior. Fácil de poner y sacar sin ayuda adulta.',
-    'Suela ultraflex con hendiduras que permiten doblarse 360°. Horma amplia para pies en crecimiento con soporte de arco plantilla.',
-    'Running shoe junior con materiales reflectivos para mayor seguridad. Liviano y transpirable, ideal para actividades escolares y deporte.',
-  ],
-  kidsCloth: [
-    'Prenda deportiva infantil de tela suave que no irrita la piel. Corte ergonómico que no limita el movimiento durante el juego o deporte.',
-    'Tejido DryFit de secado rápido. Costuras planas para evitar roces y elástico suave en cintura sin apretar. Lavable a máquina.',
-    'Tela de doble capa con interior suave tipo polar liviano y exterior resistente al viento. Cierre fácil y bolsillos seguros con velcro.',
-    'Resistente a lavados frecuentes. Colores vivos que no pierden intensidad. Telas hipoalergénicas certificadas dermatológicamente.',
-    'Diseño moderno con detalles reflectivos y estampados divertidos. Tela antibacterial que inhibe el mal olor tras el ejercicio intenso.',
-  ],
-};
-
-// ── Tag pool ─────────────────────────────────────────────────
-const TAGS = [null, null, null, 'Nuevo', null, 'Más Vendido', null, null, 'Premium', null, 'Tendencia', null, null, null];
-
-// ── Product builder ──────────────────────────────────────────
-const build = (raw, startId, category, type, imgKey, sizes, descKey) =>
-  raw.map(([name, price], i) => ({
-    id: startId + i,
-    name,
-    category,
-    type,
-    price,
-    description: cy(DESC[descKey], i),
-    image: cy(IMG[imgKey], i),
-    sizes,
-    tag: cy(TAGS, i),
-    rating: rt(i),
-  }));
-
-// ── Raw product data ─────────────────────────────────────────
-
-// HOMBRE – CALZADO (50) ids 13-62
-const MEN_SHOE = [
-  ['Rocket X Pro 2.0', 32000], ['Thunder Boost Elite', 28500], ['Storm Runner Pro', 24900],
-  ['Blaze Sprint X', 31000],   ['Fire Trail Elite', 35000],    ['Vortex Cross Pro', 27500],
-  ['Apex Racer X', 33000],     ['Summit Peak Elite', 29000],   ['Flash Run Pro', 26500],
-  ['Dynamic Force X', 30000],  ['Power Step Elite', 28000],    ['Elite Drive Pro', 34500],
-  ['Ultra Grip X', 22000],     ['Speed Carbon Pro', 38000],    ['Carbon Max Elite', 41000],
-  ['Phoenix Rise Pro', 29500], ['Bolt Runner X', 27000],       ['Hyper Pace Elite', 32500],
-  ['Rapid Strike Pro', 25000], ['Wind Cutter X', 28000],       ['Terra Boss Elite', 23500],
-  ['Road Conqueror Pro', 30500],['Sprint Max X', 26000],       ['Velocity Elite Pro', 33000],
-  ['Endurance King X', 31500], ['Marathon Elite Pro', 36000],  ['Mountain Trek X', 34000],
-  ['Trail Blazer Pro', 29000], ['Jungle Force Elite', 27500],  ['Desert Storm Pro', 32000],
-  ['Arctic Runner X', 24500],  ['Peak Performer Pro', 35500],  ['Power Surge Elite', 28500],
-  ['Energy Boost X', 26000],   ['Thunder Strike Pro', 30000],  ['Lightning Elite X', 37000],
-  ['Meteor Runner Pro', 25500],['Comet Sprint X', 29000],      ['Nova Racer Elite', 31000],
-  ['Galaxy Drive Pro', 33500], ['Orbit Runner X', 27000],      ['Star Force Elite', 29500],
-  ['Zenith Elite Pro', 36500], ['Apex Master X', 28000],       ['Summit Boss Elite', 31500],
-  ['Peak Master Pro', 34000],  ['Crest Runner X', 26500],      ['Ridge Racer Elite', 30000],
-  ['Canyon Cross Pro', 28500], ['Valley Sprint X', 23000],
-];
-
-// HOMBRE – INDUMENTARIA (50) ids 63-112
-const MEN_CLOTH = [
-  ['Training Tee Elite', 8900],    ['Performance Short Pro', 9500],  ['Fire Hoodie X', 18500],
-  ['Zip Jacket Storm', 22000],     ['Compression Tee Pro', 7500],    ['Dry Fit Shorts Elite', 8200],
-  ['Tech Training Pants', 14500],  ['Runner Vest Pro', 11000],       ['Athletic Cap Fire', 5500],
-  ['Muscle Tank Elite', 7000],     ['Wind Jacket Pro', 21000],       ['Power Legging X', 12000],
-  ['Sport Tee Blaze', 8500],       ['Training Short Rapid', 9000],   ['Flex Hoodie Storm', 17500],
-  ['Base Layer Pro', 11500],       ['Warm Up Jacket X', 19500],      ['Sport Cap Ultra', 6000],
-  ['Compression Short Pro', 10000],['Training Tank Elite', 7500],    ['Elite Running Top', 9000],
-  ['Speed Short Pro', 8800],       ['Storm Jacket Pro', 23500],      ['Training Hoodie X', 18000],
-  ['Flex Tee Elite', 8200],        ['Road Running Pants', 15000],    ['Warm Layer Jacket', 20000],
-  ['Sprint Short Pro', 9200],      ['Athletic Vest Fire', 11500],    ['Training Cap Elite', 5800],
-  ['Performance Top X', 8700],     ['Ultra Dry Tee Pro', 7800],      ['Cardio Short Elite', 9400],
-  ['Marathon Jacket Pro', 24000],  ['Flex Pant Storm', 14800],       ['Running Tee Rapid', 8400],
-  ['Cross Training Short', 9800],  ['Power Jacket Elite', 22500],    ['Ultra Hoodie Pro', 19000],
-  ['Sport Vest X', 12000],         ['Tech Tee Performance', 8600],   ['Training Pant Rapid', 15500],
-  ['Long Sleeve Pro', 10000],      ['Warm Up Short Elite', 8900],    ['Compression Jacket X', 21500],
-  ['Speed Tee Ultra', 7900],       ['Athletic Hoodie Fire', 17000],  ['Training Long Tee', 9100],
-  ['Sport Jacket Blaze', 22000],   ['Elite Vest Pro X', 12500],
-];
-
-// MUJER – CALZADO (50) ids 113-162
-const WOMEN_SHOE = [
-  ['Ember Run Pro', 25500],    ['Aurora Sprint X', 28000],   ['Bloom Racer Elite', 23000],
-  ['Crystal Step Pro', 26500], ['Dawn Dash X', 24000],       ['Echo Pace Elite', 29000],
-  ['Flower Force Pro', 21500], ['Grace Sprint X', 27500],    ['Harmony Run Elite', 24500],
-  ['Iris Boost Pro', 31000],   ['Jade Racer X', 26000],      ['Luna Speed Elite', 28500],
-  ['Maple Run Pro', 22500],    ['Nova Sprint X', 30000],     ['Opal Force Elite', 27000],
-  ['Pearl Dash Pro', 23500],   ['Quartz Runner X', 29500],   ['Rose Sprint Elite', 25000],
-  ['Sapphire Pace Pro', 32000],['Terra Bloom X', 24500],     ['Ursa Run Elite', 26500],
-  ['Violet Speed Pro', 28000], ['Wave Dash X', 23000],       ['Yoga Boost Elite', 21000],
-  ['Zara Run Pro', 27000],     ['Aria Racer X', 29500],      ['Bella Speed Elite', 25500],
-  ['Coral Force Pro', 31500],  ['Daisy Run X', 22000],       ['Ember Pro Elite', 33000],
-  ['Fern Sprint Pro', 27500],  ['Glow Dash X', 24000],       ['Haven Force Elite', 29000],
-  ['Isla Run Pro', 26000],     ['Jade Sprint X', 28500],     ['Kiwi Boost Elite', 23500],
-  ['Lily Speed Pro', 30000],   ['Mint Runner X', 25000],     ['Neon Bloom Elite', 27500],
-  ['Olive Sprint Pro', 32500], ['Prism Run X', 24500],       ['River Dash Elite', 28000],
-  ['Sol Sprint Pro', 26500],   ['Teal Runner X', 22500],     ['Uma Speed Elite', 29500],
-  ['Vera Force Pro', 27000],   ['Wind Bloom X', 23000],      ['Yara Sprint Elite', 31000],
-  ['Zola Run Pro', 25500],     ['Flora Dash X', 28500],
-];
-
-// MUJER – INDUMENTARIA (50) ids 163-212
-const WOMEN_CLOTH = [
-  ['Yoga Flow Set', 14200],          ['Compression Legging Elite', 10500], ['Sports Bra Ultra', 8000],
-  ['Run Easy Jacket', 21000],        ['Active Short Pro', 9000],           ['Training Top Bloom', 8500],
-  ['Yoga Pant Flow Pro', 12000],     ['Compression Top X', 9500],          ['Cardio Short Elite', 8800],
-  ['Run Jacket Soft Pro', 22000],    ['Flex Legging Ultra', 11000],        ['Support Bra Pro X', 8200],
-  ['Ease Short Runner', 9200],       ['Active Top Bloom Pro', 8700],       ['Flow Pant Yoga X', 12500],
-  ['Ultra Compression Set', 15000],  ['Trail Jacket Light Pro', 20000],    ['Warm Legging Elite', 11500],
-  ['Training Bra Ultra', 7800],      ['Sport Short Flow Pro', 9400],       ['Performance Jacket X', 23000],
-  ['Active Tank Ultra Pro', 8300],   ['Run Pant Elite', 13000],            ['Yoga Top Soft X', 8900],
-  ['Compression Short Ultra', 9800], ['Flow Jacket Elite Pro', 21500],     ['Trail Top Runner X', 8600],
-  ['Ultra Short Bloom Pro', 9100],   ['Support Tank Elite', 8100],         ['Run Set Pro Ultra', 16000],
-  ['Cardio Jacket Light', 20500],    ['Flex Top Ultra Pro', 8800],         ['Training Pant Bloom X', 13500],
-  ['Sport Tank Flow Pro', 8400],     ['Yoga Short Elite', 9600],           ['Elastic Legging Pro X', 11500],
-  ['Run Bra Ultra Elite', 8500],     ['Active Jacket Bloom', 22500],       ['Flow Short Runner Pro', 9700],
-  ['Trail Legging Ultra X', 12000],  ['Ultra Top Bloom Elite', 8900],      ['Cardio Tank Runner', 8200],
-  ['Yoga Jacket Flow Pro', 23000],   ['Performance Short X', 9900],        ['Flow Bra Elite Pro', 8700],
-  ['Active Pant Ultra', 13500],      ['Trail Tank Bloom X', 8600],         ['Run Legging Elite Pro', 11800],
-  ['Sport Jacket Flow Ultra', 22000],['Training Set Elite Pro', 17000],
-];
-
-// NIÑOS – CALZADO (50) ids 213-262
-const KIDS_SHOE = [
-  ['Junior Sprint X', 15900],   ['Mini Racer Pro', 14500],    ['Tiny Boost Elite', 13000],
-  ['Little Runner X', 15500],   ['Kinder Step Pro', 12500],   ['Active Junior Elite', 14000],
-  ['Young Racer X', 16500],     ['Speed Kid Pro', 13500],     ['Flash Junior Elite', 15000],
-  ['Zoom Mini X', 12000],       ['Quick Step Pro', 14500],    ['Fun Runner Elite', 13000],
-  ['Play Boost X', 15500],      ['Kids Force Pro', 16000],    ['Jump Sprint Elite', 14000],
-  ['Active Mini X', 13500],     ['Trail Junior Pro', 17000],  ['Run Kid Elite', 14500],
-  ['Dash Mini X', 13000],       ['Power Junior Pro', 16500],  ['Speed Mini Elite', 15000],
-  ['Blast Junior X', 14000],    ['Zoom Kid Pro', 17500],      ['Race Mini Elite', 13500],
-  ['Quick Junior X', 15500],    ['Young Force Pro', 16000],   ['Small Sprint Elite', 12500],
-  ['Jump Kid X', 14500],        ['Tiny Racer Pro', 13000],    ['Fun Step Elite', 15000],
-  ['Bright Runner X', 14000],   ['Cool Boost Pro', 16500],    ['Fast Junior Elite', 13500],
-  ['Play Racer X', 15500],      ['Active Step Pro', 14000],   ['Zoom Junior Elite', 17000],
-  ['Run Mini X', 13000],        ['Sprint Kid Pro', 15000],    ['Dash Junior Elite', 14500],
-  ['Power Mini X', 16000],      ['Speed Force Pro', 13500],   ['Flash Kid Elite', 14000],
-  ['Quick Mini X', 15500],      ['Young Sprint Pro', 16500],  ['Jump Racer Elite', 13000],
-  ['Tiny Force X', 14500],      ['Cool Junior Pro', 15000],   ['Fast Mini Elite', 13500],
-  ['Bright Step X', 16000],     ['Run Force Pro', 14000],
-];
-
-// NIÑOS – INDUMENTARIA (50) ids 263-312
-const KIDS_CLOTH = [
-  ['Junior Training Tee', 7500],   ['Kids Sport Short', 8000],    ['Young Hoodie Pro', 11200],
-  ['Mini Active Top', 7000],       ['Little Runner Tee', 7800],   ['Kinder Training Set', 12500],
-  ['Youth Sport Jacket', 10500],   ['Kids Active Short', 8200],   ['Young Training Top', 7600],
-  ['Mini Hoodie Sport', 10800],    ['Junior Sport Pant', 9500],   ['Tiny Training Tee', 7200],
-  ['Active Kids Short', 8400],     ['Speed Junior Tee', 7900],    ['Young Sport Jacket', 11000],
-  ['Flash Kids Set', 13000],       ['Mini Runner Short', 8100],   ['Kinder Active Top', 7500],
-  ['Youth Training Tee', 7800],    ['Junior Sport Short', 8500],  ['Kids Warm Jacket', 11500],
-  ['Young Active Tee', 7600],      ['Mini Sport Short', 8200],    ['Little Training Set', 12800],
-  ['Speed Kids Jacket', 11000],    ['Young Runner Tee', 7700],    ['Kinder Sport Short', 8300],
-  ['Mini Active Jacket', 10500],   ['Junior Training Short', 8600],['Kids Flex Top', 7900],
-  ['Young Sport Set', 13500],      ['Tiny Active Tee', 7400],     ['Flash Junior Short', 8500],
-  ['Mini Training Jacket', 11200], ['Kinder Runner Tee', 7800],   ['Youth Active Set', 13000],
-  ['Junior Flex Short', 8700],     ['Kids Training Jacket', 11500],['Young Mini Tee', 7500],
-  ['Speed Kids Short', 8400],      ['Mini Sport Jacket', 10800],  ['Little Active Tee', 7600],
-  ['Young Training Short', 8600],  ['Kinder Sport Set', 12500],   ['Junior Runner Jacket', 11000],
-  ['Mini Flex Tee', 7700],         ['Kids Active Top', 7900],     ['Young Speed Short', 8500],
-  ['Tiny Sport Jacket', 10500],    ['Junior Active Set', 13500],
-];
-
-// ── Assemble all products ────────────────────────────────────
+// ── Featured / Hero products (ids 1–12) ──────────────────────
 const featured = [
   {
     id: 1, name: 'Zapatillas Rocket X Pro', category: 'Hombre', type: 'Calzado', price: 29999,
     description: 'Zapatillas de running de alto rendimiento con tecnología de amortiguación reactiva. Suela de carbono para máxima propulsión y upper de malla transpirable ultra liviana.',
     image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80',
-    sizes: ['39','40','41','42','43','44'], tag: 'Nuevo', rating: 4.8,
+    sizes: SZ.menShoe, tag: 'Nuevo', rating: 4.8,
   },
   {
     id: 2, name: 'Campera Training Fire', category: 'Hombre', type: 'Indumentaria', price: 18500,
     description: 'Campera de entrenamiento con tejido DryFit que evacúa la humedad. Diseño ergonómico con costuras planas para mayor comodidad en movimiento.',
     image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80',
-    sizes: ['S','M','L','XL'], tag: 'Más Vendido', rating: 4.6,
+    sizes: SZ.adultCl, tag: 'Más Vendido', rating: 4.6,
   },
   {
     id: 3, name: 'Zapatillas Ember Run', category: 'Mujer', type: 'Calzado', price: 25500,
     description: 'Zapatillas de running femeninas con horma anatómica y amortiguación adaptativa. Diseño elegante en tonos terra con detalles en naranja fuego.',
     image: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=600&q=80',
-    sizes: ['36','37','38','39','40','41'], tag: 'Nuevo', rating: 4.9,
+    sizes: SZ.womenShoe, tag: 'Nuevo', rating: 4.9,
   },
   {
     id: 4, name: 'Conjunto Yoga Terra', category: 'Mujer', type: 'Indumentaria', price: 14200,
     description: 'Conjunto de yoga de dos piezas en tela de compresión suave. Top deportivo con soporte integrado y calza de cintura alta con bolsillo lateral.',
     image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&q=80',
-    sizes: ['XS','S','M','L','XL'], tag: 'Tendencia', rating: 4.7,
+    sizes: SZ.adultCl, tag: 'Tendencia', rating: 4.7,
   },
   {
     id: 5, name: 'Zapatillas Junior Sprint', category: 'Niños', type: 'Calzado', price: 15900,
     description: 'Zapatillas deportivas para niños con sistema de cierre fácil y suela antideslizante. Diseño colorido que combina estilo y funcionalidad para los más activos.',
     image: 'https://images.unsplash.com/photo-1556906781-9a412961a6bf?w=600&q=80',
-    sizes: ['30','31','32','33','34','35'], tag: 'Kids', rating: 4.5,
+    sizes: SZ.kidsShoe, tag: 'Kids', rating: 4.5,
   },
   {
     id: 6, name: 'Remera Performance Hombre', category: 'Hombre', type: 'Indumentaria', price: 8900,
     description: 'Remera de entrenamiento con tecnología de absorción de humedad. Tejido ultraligero y costuras planas para máxima comodidad durante el ejercicio intenso.',
     image: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&q=80',
-    sizes: ['S','M','L','XL'], tag: null, rating: 4.4,
+    sizes: SZ.adultCl, tag: null, rating: 4.4,
   },
   {
     id: 7, name: 'Buzo Junior Active', category: 'Niños', type: 'Indumentaria', price: 11200,
     description: 'Buzo deportivo para niños de tela polar liviana con capucha. Perfecto para actividades al aire libre con diseño ergonómico que no limita el movimiento.',
     image: 'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=600&q=80',
-    sizes: ['S','M','L'], tag: null, rating: 4.3,
+    sizes: SZ.kidsCl, tag: null, rating: 4.3,
   },
   {
     id: 8, name: 'Zapatillas Vortex Trail', category: 'Hombre', type: 'Calzado', price: 32500,
     description: 'Zapatillas de trail running con protección reforzada y agarre extremo para terrenos difíciles. Upper de materiales técnicos resistentes al agua y al desgaste.',
     image: 'https://images.unsplash.com/photo-1605348532760-6753d2c43329?w=600&q=80',
-    sizes: ['40','41','42','43','44','45'], tag: 'Premium', rating: 4.9,
+    sizes: SZ.menShoe, tag: 'Premium', rating: 4.9,
   },
   {
     id: 9, name: 'Calza Compresión Mujer', category: 'Mujer', type: 'Indumentaria', price: 10500,
     description: 'Calza de compresión de cintura alta con tela opaca y bolsillo en cinturilla. Tecnología de compresión gradual que mejora la circulación y reduce la fatiga muscular.',
     image: 'https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=600&q=80',
-    sizes: ['XS','S','M','L','XL'], tag: 'Más Vendido', rating: 4.8,
+    sizes: SZ.adultCl, tag: 'Más Vendido', rating: 4.8,
   },
   {
     id: 10, name: 'Zapatillas Flare Junior', category: 'Niños', type: 'Calzado', price: 13800,
     description: 'Zapatillas urbanas para niños con suela flexible y materiales livianos. Diseño moderno con detalles reflectivos para mayor seguridad en condiciones de poca luz.',
     image: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=600&q=80',
-    sizes: ['28','29','30','31','32','33'], tag: null, rating: 4.6,
+    sizes: SZ.kidsShoe, tag: null, rating: 4.6,
   },
   {
     id: 11, name: 'Campera Running Mujer', category: 'Mujer', type: 'Indumentaria', price: 21000,
     description: 'Campera de running femenina ultraliviana con capucha plegable en cuello. Tejido cortaviento que protege sin sofocar. Diseño aerodinámico para máxima performance.',
     image: 'https://images.unsplash.com/photo-1483721310020-03333e577078?w=600&q=80',
-    sizes: ['XS','S','M','L'], tag: 'Nuevo', rating: 4.7,
+    sizes: SZ.adultCl, tag: 'Nuevo', rating: 4.7,
   },
   {
     id: 12, name: 'Short Training Elite', category: 'Hombre', type: 'Indumentaria', price: 9500,
     description: 'Short de entrenamiento con doble forro interior y bolsillos laterales con cierre. Tejido de secado rápido y cintura elástica con cordón regulable.',
     image: 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=600&q=80',
-    sizes: ['S','M','L','XL'], tag: null, rating: 4.5,
+    sizes: SZ.adultCl, tag: null, rating: 4.5,
   },
 ];
 
-export const products = [
-  ...featured,
-  ...build(MEN_SHOE,    13,  'Hombre', 'Calzado',      'menShoe',   SZ.menShoe,   'menShoe'),
-  ...build(MEN_CLOTH,   63,  'Hombre', 'Indumentaria', 'menCloth',  SZ.adultCl,   'menCloth'),
-  ...build(WOMEN_SHOE,  113, 'Mujer',  'Calzado',      'womenShoe', SZ.womenShoe, 'womenShoe'),
-  ...build(WOMEN_CLOTH, 163, 'Mujer',  'Indumentaria', 'womenCloth',SZ.adultCl,   'womenCloth'),
-  ...build(KIDS_SHOE,   213, 'Niños',  'Calzado',      'kidsShoe',  SZ.kidsShoe,  'kidsShoe'),
-  ...build(KIDS_CLOTH,  263, 'Niños',  'Indumentaria', 'kidsCloth', SZ.kidsCl,    'kidsCloth'),
+// ── HOMBRE – CALZADO (10 productos, ids 13–22) ───────────────
+const menShoes = [
+  {
+    id: 13, name: 'Thunder Boost Elite', category: 'Hombre', type: 'Calzado', price: 28500,
+    description: 'Zapatillas de alto rendimiento con foam reactivo de última generación. Diseño bicolor aerodinámico con sistema de cierre rápido.',
+    image: 'https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=600&q=80',
+    sizes: SZ.menShoe, tag: 'Nuevo', rating: 4.7,
+  },
+  {
+    id: 14, name: 'Storm Runner Pro', category: 'Hombre', type: 'Calzado', price: 24900,
+    description: 'Zapatilla de running con upper de knit ultraliviano y entresuela de doble densidad para absorber impactos en largas distancias.',
+    image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=600&q=80',
+    sizes: SZ.menShoe, tag: null, rating: 4.5,
+  },
+  {
+    id: 15, name: 'Blaze Sprint X', category: 'Hombre', type: 'Calzado', price: 31000,
+    description: 'Velocidad y estilo en cada paso. Suela de carbono con retorno de energía óptimo para competición y entrenamiento de alto nivel.',
+    image: 'https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=600&q=80',
+    sizes: SZ.menShoe, tag: 'Premium', rating: 4.8,
+  },
+  {
+    id: 16, name: 'Fire Trail Elite', category: 'Hombre', type: 'Calzado', price: 35000,
+    description: 'Zapatillas de trail con outsole multidireccional de agarre extremo, membrana waterproof y refuerzos laterales de protección.',
+    image: 'https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?w=600&q=80',
+    sizes: SZ.menShoe, tag: null, rating: 4.6,
+  },
+  {
+    id: 17, name: 'Apex Racer X', category: 'Hombre', type: 'Calzado', price: 33000,
+    description: 'Diseñado para el corredor de competición. Drop de 8mm, peso de 240g y upper de malla Flyknit que se moldea al pie.',
+    image: 'https://images.unsplash.com/photo-1539185441755-769473a23570?w=600&q=80',
+    sizes: SZ.menShoe, tag: 'Más Vendido', rating: 4.9,
+  },
+  {
+    id: 18, name: 'Speed Carbon Pro', category: 'Hombre', type: 'Calzado', price: 38000,
+    description: 'Placa de carbono completa incrustada en foam Pebax. La elección de atletas de élite para maratones y competiciones de fondo.',
+    image: 'https://images.unsplash.com/photo-1571736772567-6b539ef2d994?w=600&q=80',
+    sizes: SZ.menShoe, tag: 'Premium', rating: 4.9,
+  },
+  {
+    id: 19, name: 'Urban Cross Elite', category: 'Hombre', type: 'Calzado', price: 26500,
+    description: 'Zapatilla urbana de entrenamiento cruzado con suela plana estable, upper reforzado y cushioning de media densidad.',
+    image: 'https://images.unsplash.com/photo-1543508282-6319a3e2621f?w=600&q=80',
+    sizes: SZ.menShoe, tag: null, rating: 4.4,
+  },
+  {
+    id: 20, name: 'Marathon Elite Pro', category: 'Hombre', type: 'Calzado', price: 36000,
+    description: 'Upper de malla ultraliviana con seams mínimas. Entresuela de 4cm de altura con foam de retorno energético superior al 85%.',
+    image: 'https://images.unsplash.com/photo-1556048219-bb6978360b84?w=600&q=80',
+    sizes: SZ.menShoe, tag: 'Tendencia', rating: 4.7,
+  },
+  {
+    id: 21, name: 'Hyper Pace Elite', category: 'Hombre', type: 'Calzado', price: 32500,
+    description: 'Zapatilla de velocidad con geometría de suela rockered que propulsa el paso hacia adelante. Ideal para 5K y 10K.',
+    image: 'https://images.unsplash.com/photo-1562183241-b937e9102303?w=600&q=80',
+    sizes: SZ.menShoe, tag: null, rating: 4.6,
+  },
+  {
+    id: 22, name: 'Mountain Trek X', category: 'Hombre', type: 'Calzado', price: 34000,
+    description: 'Bota deportiva de montaña con tobillera reforzada, suela Vibram de agarre superior y membrana impermeable certificada.',
+    image: 'https://images.unsplash.com/photo-1575537302964-96cd47c06b1b?w=600&q=80',
+    sizes: SZ.menShoe, tag: null, rating: 4.5,
+  },
 ];
 
-// ── Tag color map ─────────────────────────────────────────────
-export const tagColors = {
-  'Nuevo':       'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-  'Más Vendido': 'bg-fire-orange/20 text-fire-orange border-fire-orange/30',
-  'Tendencia':   'bg-purple-500/20 text-purple-400 border-purple-500/30',
-  'Kids':        'bg-sky-500/20 text-sky-400 border-sky-500/30',
-  'Premium':     'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-};
+// ── HOMBRE – INDUMENTARIA (10 productos, ids 23–32) ──────────
+const menClothes = [
+  {
+    id: 23, name: 'Training Tee Elite', category: 'Hombre', type: 'Indumentaria', price: 8900,
+    description: 'Remera técnica de entrenamiento con tejido DryFit de secado ultra rápido y costuras planas para mayor comodidad.',
+    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80',
+    sizes: SZ.adultCl, tag: null, rating: 4.5,
+  },
+  {
+    id: 24, name: 'Fire Hoodie X', category: 'Hombre', type: 'Indumentaria', price: 18500,
+    description: 'Buzo con capucha de tejido técnico termorrégulador. Interior suave tipo micro-polar y exterior cortaviento resistente.',
+    image: 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=600&q=80',
+    sizes: SZ.adultCl, tag: 'Más Vendido', rating: 4.7,
+  },
+  {
+    id: 25, name: 'Zip Jacket Storm', category: 'Hombre', type: 'Indumentaria', price: 22000,
+    description: 'Campera con cierre full-zip, paneles de malla estratégicos y bolsillos con cremallera resistente al agua.',
+    image: 'https://images.unsplash.com/photo-1547949003-9792a18a2601?w=600&q=80',
+    sizes: SZ.adultCl, tag: 'Nuevo', rating: 4.6,
+  },
+  {
+    id: 26, name: 'Performance Short Pro', category: 'Hombre', type: 'Indumentaria', price: 9500,
+    description: 'Short de running 7 pulgadas con liner interior integrado, bolsillo trasero con cierre y cintura elástica con cordón.',
+    image: 'https://images.unsplash.com/photo-1565084888279-aca607ecce0c?w=600&q=80',
+    sizes: SZ.adultCl, tag: null, rating: 4.4,
+  },
+  {
+    id: 27, name: 'Compression Tee Pro', category: 'Hombre', type: 'Indumentaria', price: 7500,
+    description: 'Camiseta de compresión de manga larga con gradación progresiva para mejorar la circulación y reducir la fatiga.',
+    image: 'https://images.unsplash.com/photo-1589083130544-0d6a2926e519?w=600&q=80',
+    sizes: SZ.adultCl, tag: null, rating: 4.3,
+  },
+  {
+    id: 28, name: 'Tech Training Pants', category: 'Hombre', type: 'Indumentaria', price: 14500,
+    description: 'Pantalón técnico de entrenamiento con tejido de 4 vías, rodilleras articuladas y bolsillos laterales con cremallera.',
+    image: 'https://images.unsplash.com/photo-1517940310602-26535839fe84?w=600&q=80',
+    sizes: SZ.adultCl, tag: 'Tendencia', rating: 4.6,
+  },
+  {
+    id: 29, name: 'Wind Jacket Pro', category: 'Hombre', type: 'Indumentaria', price: 21000,
+    description: 'Rompevientos ultraliviano que se guarda en su propio bolsillo. Membrana de 2 capas y sellado de costuras críticas.',
+    image: 'https://images.unsplash.com/photo-1539533018257-27f4aa8e75e5?w=600&q=80',
+    sizes: SZ.adultCl, tag: null, rating: 4.5,
+  },
+  {
+    id: 30, name: 'Muscle Tank Elite', category: 'Hombre', type: 'Indumentaria', price: 7000,
+    description: 'Musculosa de entrenamiento con corte atlético, sisa amplia y tejido de malla abierta para máxima ventilación.',
+    image: 'https://images.unsplash.com/photo-1571731956672-f2b94d7dd0cb?w=600&q=80',
+    sizes: SZ.adultCl, tag: null, rating: 4.2,
+  },
+  {
+    id: 31, name: 'Power Legging X', category: 'Hombre', type: 'Indumentaria', price: 12000,
+    description: 'Calza de compresión masculina para running y ciclismo. Tejido de 78% poliamida con panel de malla en zonas de alta transpiración.',
+    image: 'https://images.unsplash.com/photo-1506902385686-a0ca8cb9fd0e?w=600&q=80',
+    sizes: SZ.adultCl, tag: null, rating: 4.4,
+  },
+  {
+    id: 32, name: 'Marathon Jacket Pro', category: 'Hombre', type: 'Indumentaria', price: 24000,
+    description: 'Campera de competición con detalles reflectivos de 360°, capucha integrada aerodinámica y cierre resistente al agua.',
+    image: 'https://images.unsplash.com/photo-1504198453431-c8e3a01e3938?w=600&q=80',
+    sizes: SZ.adultCl, tag: 'Premium', rating: 4.8,
+  },
+];
+
+// ── MUJER – CALZADO (10 productos, ids 33–42) ────────────────
+const womenShoes = [
+  {
+    id: 33, name: 'Ember Run Pro', category: 'Mujer', type: 'Calzado', price: 25500,
+    description: 'Zapatilla femenina con horma anatómica wide-toe, amortiguación reactiva y upper de malla transpirable en colores vibrantes.',
+    image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=600&q=80',
+    sizes: SZ.womenShoe, tag: 'Nuevo', rating: 4.8,
+  },
+  {
+    id: 34, name: 'Aurora Sprint X', category: 'Mujer', type: 'Calzado', price: 28000,
+    description: 'Diseñada con tecnología de retorno de energía para cada pisada. Suela Continental para máximo agarre en superficie mojada.',
+    image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&q=80',
+    sizes: SZ.womenShoe, tag: null, rating: 4.6,
+  },
+  {
+    id: 35, name: 'Bloom Racer Elite', category: 'Mujer', type: 'Calzado', price: 23000,
+    description: 'Zapatilla liviana con plantilla OrthoLite removible, exterior Primeknit y suela translúcida de goma de alta resistencia.',
+    image: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=600&q=80',
+    sizes: SZ.womenShoe, tag: 'Más Vendido', rating: 4.7,
+  },
+  {
+    id: 36, name: 'Coral Force Pro', category: 'Mujer', type: 'Calzado', price: 31500,
+    description: 'Zapatilla de trail femenina con refuerzos laterales, sistema de cierre quick-lace y suela multidireccional de alta tracción.',
+    image: 'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=600&q=80',
+    sizes: SZ.womenShoe, tag: null, rating: 4.5,
+  },
+  {
+    id: 37, name: 'Crystal Step Pro', category: 'Mujer', type: 'Calzado', price: 26500,
+    description: 'Zapatilla de gym con suela plana específica para yoga, pilates y levantamiento. Upper de malla flexible con soporte lateral.',
+    image: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=600&q=80',
+    sizes: SZ.womenShoe, tag: 'Tendencia', rating: 4.6,
+  },
+  {
+    id: 38, name: 'Luna Speed Elite', category: 'Mujer', type: 'Calzado', price: 28500,
+    description: 'Running shoe de velocidad con foam Peba ultraligero, placa de nylon y upper de malla de 100% materiales reciclados.',
+    image: 'https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?w=600&q=80',
+    sizes: SZ.womenShoe, tag: null, rating: 4.7,
+  },
+  {
+    id: 39, name: 'Nova Sprint X', category: 'Mujer', type: 'Calzado', price: 30000,
+    description: 'Diseño premium con degradé de colores vibrantes. Foam Boost de alta memoria y geometría de suela estabilizadora.',
+    image: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=600&q=80',
+    sizes: SZ.womenShoe, tag: 'Premium', rating: 4.8,
+  },
+  {
+    id: 40, name: 'Sapphire Pace Pro', category: 'Mujer', type: 'Calzado', price: 32000,
+    description: 'Zapatilla de fondo con drop de 6mm, foam de alta compresión y tira reflectiva trasera para entrenamientos nocturnos.',
+    image: 'https://images.unsplash.com/photo-1561861422-a549073e547a?w=600&q=80',
+    sizes: SZ.womenShoe, tag: null, rating: 4.6,
+  },
+  {
+    id: 41, name: 'Violet Speed Pro', category: 'Mujer', type: 'Calzado', price: 28000,
+    description: 'Upper de knit elástico 360°, entresuela de PU reactivo y refuerzo de talón con exoesqueleto de TPU ultraligero.',
+    image: 'https://images.unsplash.com/photo-1600185652960-b8adb76aebe5?w=600&q=80',
+    sizes: SZ.womenShoe, tag: null, rating: 4.5,
+  },
+  {
+    id: 42, name: 'Iris Boost Pro', category: 'Mujer', type: 'Calzado', price: 31000,
+    description: 'Sistema Boost completo en entresuela con retorno de energía del 85%. Horma específica femenina para mejor ajuste y confort.',
+    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80',
+    sizes: SZ.womenShoe, tag: 'Más Vendido', rating: 4.9,
+  },
+];
+
+// ── MUJER – INDUMENTARIA (10 productos, ids 43–52) ───────────
+const womenClothes = [
+  {
+    id: 43, name: 'Yoga Flow Set', category: 'Mujer', type: 'Indumentaria', price: 14200,
+    description: 'Conjunto de yoga en tela de compresión suave de 4 vías. Top con soporte integrado y calza de cintura alta con bolsillo oculto.',
+    image: 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=600&q=80',
+    sizes: SZ.adultCl, tag: 'Tendencia', rating: 4.7,
+  },
+  {
+    id: 44, name: 'Compression Legging Elite', category: 'Mujer', type: 'Indumentaria', price: 10500,
+    description: 'Calza de compresión de cintura alta con tela opaca sin transparencias. Tecnología de compresión gradual para mejor performance.',
+    image: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&q=80',
+    sizes: SZ.adultCl, tag: 'Más Vendido', rating: 4.8,
+  },
+  {
+    id: 45, name: 'Sports Bra Ultra', category: 'Mujer', type: 'Indumentaria', price: 8000,
+    description: 'Sports bra de soporte medio-alto con espalda cruzada y breteles ajustables. Interior de mesh que elimina la humedad.',
+    image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80',
+    sizes: SZ.adultCl, tag: null, rating: 4.6,
+  },
+  {
+    id: 46, name: 'Run Easy Jacket', category: 'Mujer', type: 'Indumentaria', price: 21000,
+    description: 'Campera ultraliviana con capucha plegable en el cuello. Tejido cortaviento con membrana interna de protección a la lluvia.',
+    image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80',
+    sizes: SZ.adultCl, tag: 'Nuevo', rating: 4.5,
+  },
+  {
+    id: 47, name: 'Active Short Pro', category: 'Mujer', type: 'Indumentaria', price: 9000,
+    description: 'Short de running 3 pulgadas con malla interior integrada, bolsillo trasero con cierre y cintura elástica de alta sujeción.',
+    image: 'https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=600&q=80',
+    sizes: SZ.adultCl, tag: null, rating: 4.4,
+  },
+  {
+    id: 48, name: 'Training Top Bloom', category: 'Mujer', type: 'Indumentaria', price: 8500,
+    description: 'Remera de entrenamiento con corte amplio y suelto. Tejido de bambú mezclado con poliéster para suavidad y transpirabilidad.',
+    image: 'https://images.unsplash.com/photo-1483721310020-03333e577078?w=600&q=80',
+    sizes: SZ.adultCl, tag: null, rating: 4.5,
+  },
+  {
+    id: 49, name: 'Trail Jacket Light Pro', category: 'Mujer', type: 'Indumentaria', price: 20000,
+    description: 'Campera de trail ultracompacta que se guarda en su bolsillo. Costuras selladas y capucha ajustable con correa elástica.',
+    image: 'https://images.unsplash.com/photo-1578681994506-b8f463449011?w=600&q=80',
+    sizes: SZ.adultCl, tag: null, rating: 4.6,
+  },
+  {
+    id: 50, name: 'Warm Legging Elite', category: 'Mujer', type: 'Indumentaria', price: 11500,
+    description: 'Calza térmica con interior de felpa suave y exterior DryFit. Ideal para entrenamientos en temperatura baja o como capa base.',
+    image: 'https://images.unsplash.com/photo-1542060748-10c28b62716f?w=600&q=80',
+    sizes: SZ.adultCl, tag: 'Nuevo', rating: 4.7,
+  },
+  {
+    id: 51, name: 'Performance Jacket X', category: 'Mujer', type: 'Indumentaria', price: 23000,
+    description: 'Campera de competición con cremalleras resistentes al agua, paneles de ventilación y detalles reflectivos en mangas.',
+    image: 'https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=600&q=80',
+    sizes: SZ.adultCl, tag: 'Premium', rating: 4.8,
+  },
+  {
+    id: 52, name: 'Run Set Pro Ultra', category: 'Mujer', type: 'Indumentaria', price: 16000,
+    description: 'Set completo de running: top de compresión con soporte integrado y calza de cintura alta. Tejido de 4 vías ultra suave.',
+    image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&q=80',
+    sizes: SZ.adultCl, tag: 'Tendencia', rating: 4.9,
+  },
+];
+
+// ── NIÑOS – CALZADO (10 productos, ids 53–62) ────────────────
+const kidsShoes = [
+  {
+    id: 53, name: 'Junior Sprint X', category: 'Niños', type: 'Calzado', price: 15900,
+    description: 'Zapatillas infantiles con suela flexible antideslizante y cierre de velcro doble. Upper suave que protege sin comprimir el pie.',
+    image: 'https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=600&q=80',
+    sizes: SZ.kidsShoe, tag: 'Kids', rating: 4.6,
+  },
+  {
+    id: 54, name: 'Mini Racer Pro', category: 'Niños', type: 'Calzado', price: 14500,
+    description: 'Diseño colorido y liviano con puntera reforzada. Suela de EVA que amortigua los impactos durante los juegos más activos.',
+    image: 'https://images.unsplash.com/photo-1555274175-6cbf6f3b137b?w=600&q=80',
+    sizes: SZ.kidsShoe, tag: null, rating: 4.5,
+  },
+  {
+    id: 55, name: 'Tiny Boost Elite', category: 'Niños', type: 'Calzado', price: 13000,
+    description: 'Zapatilla con sistema de cierre rápido y materiales antibacteriales en interior. Fácil de poner y sacar sin ayuda adulta.',
+    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80',
+    sizes: SZ.kidsShoe, tag: 'Nuevo', rating: 4.4,
+  },
+  {
+    id: 56, name: 'Flash Junior Elite', category: 'Niños', type: 'Calzado', price: 15000,
+    description: 'Running shoe junior con materiales reflectivos para mayor seguridad. Liviano y transpirable, ideal para actividades escolares.',
+    image: 'https://images.unsplash.com/photo-1563545817-2b17a9a1e02e?w=600&q=80',
+    sizes: SZ.kidsShoe, tag: null, rating: 4.5,
+  },
+  {
+    id: 57, name: 'Active Junior Elite', category: 'Niños', type: 'Calzado', price: 14000,
+    description: 'Suela ultraflex con hendiduras que permiten doblarse 360°. Horma amplia para pies en crecimiento con soporte de arco plantilla.',
+    image: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=600&q=80',
+    sizes: SZ.kidsShoe, tag: null, rating: 4.3,
+  },
+  {
+    id: 58, name: 'Young Racer X', category: 'Niños', type: 'Calzado', price: 16500,
+    description: 'Zapatilla deportiva de alta performance para niños activos. Foam de entresuela con excelente retorno de energía y grip superior.',
+    image: 'https://images.unsplash.com/photo-1556906781-9a412961a6bf?w=600&q=80',
+    sizes: SZ.kidsShoe, tag: 'Más Vendido', rating: 4.7,
+  },
+  {
+    id: 59, name: 'Bright Runner X', category: 'Niños', type: 'Calzado', price: 14000,
+    description: 'Colores vibrantes con parches reflectivos en talón. Suela con patrón específico para césped y superficies urbanas.',
+    image: 'https://images.unsplash.com/photo-1605348532760-6753d2c43329?w=600&q=80',
+    sizes: SZ.kidsShoe, tag: null, rating: 4.4,
+  },
+  {
+    id: 60, name: 'Speed Kid Pro', category: 'Niños', type: 'Calzado', price: 13500,
+    description: 'Zapatilla de velcro de apertura fácil y amplia. Interior lavable y materiales hipoalergénicos certificados para piel sensible.',
+    image: 'https://images.unsplash.com/photo-1575537302964-96cd47c06b1b?w=600&q=80',
+    sizes: SZ.kidsShoe, tag: null, rating: 4.3,
+  },
+  {
+    id: 61, name: 'Cool Boost Pro', category: 'Niños', type: 'Calzado', price: 16500,
+    description: 'Inspirada en modelos de alta competición pero adaptada a pie infantil. Upper de malla con detalles en TPU y foam reactivo.',
+    image: 'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=600&q=80',
+    sizes: SZ.kidsShoe, tag: 'Tendencia', rating: 4.6,
+  },
+  {
+    id: 62, name: 'Trail Junior Pro', category: 'Niños', type: 'Calzado', price: 17000,
+    description: 'Zapatilla de trail para niños aventureros. Suela de agarre multidireccional, refuerzo en puntera y tobillera ligera de soporte.',
+    image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=600&q=80',
+    sizes: SZ.kidsShoe, tag: null, rating: 4.5,
+  },
+];
+
+// ── NIÑOS – INDUMENTARIA (10 productos, ids 63–72) ───────────
+const kidsClothes = [
+  {
+    id: 63, name: 'Junior Training Tee', category: 'Niños', type: 'Indumentaria', price: 7500,
+    description: 'Remera deportiva infantil de tela DryFit suave que no irrita la piel. Corte ergonómico que no limita el movimiento.',
+    image: 'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=600&q=80',
+    sizes: SZ.kidsCl, tag: null, rating: 4.4,
+  },
+  {
+    id: 64, name: 'Kids Sport Short', category: 'Niños', type: 'Indumentaria', price: 8000,
+    description: 'Short deportivo con elástico suave en cintura y bolsillos laterales. Tejido DryFit de secado rápido y lavable a máquina.',
+    image: 'https://images.unsplash.com/photo-1519278409-1f56ab241a43?w=600&q=80',
+    sizes: SZ.kidsCl, tag: null, rating: 4.3,
+  },
+  {
+    id: 65, name: 'Young Hoodie Pro', category: 'Niños', type: 'Indumentaria', price: 11200,
+    description: 'Buzo con capucha de doble capa, interior suave tipo polar liviano y exterior resistente al viento. Cierre fácil y bolsillos seguros.',
+    image: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600&q=80',
+    sizes: SZ.kidsCl, tag: 'Más Vendido', rating: 4.6,
+  },
+  {
+    id: 66, name: 'Kinder Training Set', category: 'Niños', type: 'Indumentaria', price: 12500,
+    description: 'Conjunto deportivo de dos piezas: remera y short a juego. Telas hipoalergénicas certificadas dermatológicamente.',
+    image: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&q=80',
+    sizes: SZ.kidsCl, tag: 'Nuevo', rating: 4.5,
+  },
+  {
+    id: 67, name: 'Youth Sport Jacket', category: 'Niños', type: 'Indumentaria', price: 10500,
+    description: 'Campera deportiva juvenil con paneles de malla en espalda y axilas. Cierre central y puños con elástico suave ajustable.',
+    image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&q=80',
+    sizes: SZ.kidsCl, tag: null, rating: 4.4,
+  },
+  {
+    id: 68, name: 'Mini Hoodie Sport', category: 'Niños', type: 'Indumentaria', price: 10800,
+    description: 'Buzo casual deportivo con diseño de personajes divertidos. Tela antibacterial que inhibe el mal olor tras el ejercicio.',
+    image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80',
+    sizes: SZ.kidsCl, tag: null, rating: 4.3,
+  },
+  {
+    id: 69, name: 'Junior Sport Pant', category: 'Niños', type: 'Indumentaria', price: 9500,
+    description: 'Pantalón deportivo con cintura elástica regulable y botamanga ajustable. Tejido de felpa liviana con interior suave.',
+    image: 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=600&q=80',
+    sizes: SZ.kidsCl, tag: null, rating: 4.2,
+  },
+  {
+    id: 70, name: 'Flash Kids Set', category: 'Niños', type: 'Indumentaria', price: 13000,
+    description: 'Set completo de 3 piezas: short, remera y buzo. Colores vivos que no pierden intensidad. Resistente a lavados frecuentes.',
+    image: 'https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=600&q=80',
+    sizes: SZ.kidsCl, tag: 'Tendencia', rating: 4.7,
+  },
+  {
+    id: 71, name: 'Active Kids Short', category: 'Niños', type: 'Indumentaria', price: 8200,
+    description: 'Short de deporte con diseño moderno y detalles reflectivos. Tejido DryFit con bolsillo lateral con velcro para seguridad.',
+    image: 'https://images.unsplash.com/photo-1483721310020-03333e577078?w=600&q=80',
+    sizes: SZ.kidsCl, tag: null, rating: 4.4,
+  },
+  {
+    id: 72, name: 'Young Sport Jacket', category: 'Niños', type: 'Indumentaria', price: 11000,
+    description: 'Campera ligera con capucha integrada y detalles de color contrastante. Perfecta para entrenamiento o uso urbano diario.',
+    image: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=600&q=80',
+    sizes: SZ.kidsCl, tag: null, rating: 4.5,
+  },
+];
+
+// ── Export ───────────────────────────────────────────────────
+export const products = [
+  ...featured,
+  ...menShoes,
+  ...menClothes,
+  ...womenShoes,
+  ...womenClothes,
+  ...kidsShoes,
+  ...kidsClothes,
+];

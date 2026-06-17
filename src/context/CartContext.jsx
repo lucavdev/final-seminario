@@ -1,9 +1,10 @@
-import { createContext, useContext, useReducer } from 'react';
+import { createContext, useContext, useReducer, useEffect } from 'react';
 
 // ── Types ────────────────────────────────────────────────────
 // cartItem: { id, name, price, image, size, quantity, type, category }
 
 const CartContext = createContext(null);
+const STORAGE_KEY = 'fuego_sport_cart';
 
 function cartReducer(state, action) {
   switch (action.type) {
@@ -34,8 +35,26 @@ function cartReducer(state, action) {
   }
 }
 
+function loadCart() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+}
+
 export function CartProvider({ children }) {
-  const [cart, dispatch] = useReducer(cartReducer, []);
+  const [cart, dispatch] = useReducer(cartReducer, [], loadCart);
+
+  // Persist cart to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+    } catch {
+      // Silently fail if storage is unavailable
+    }
+  }, [cart]);
 
   const addItem = (product, size, quantity = 1) => {
     dispatch({

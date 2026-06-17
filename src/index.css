@@ -67,6 +67,14 @@
            transition-all duration-200;
   }
 
+  .input-field option {
+    @apply bg-dark-800 text-earth-100;
+  }
+
+  .input-field textarea {
+    @apply resize-none;
+  }
+
   .filter-chip {
     @apply px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200
            cursor-pointer select-none;

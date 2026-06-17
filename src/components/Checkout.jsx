@@ -1,28 +1,38 @@
 import { useState } from 'react';
 import {
   ArrowLeft, CreditCard, Banknote, Building2, Home, MapPin,
-  User, Mail, Phone, CheckCircle2, Package, Flame, ChevronRight
+  User, Mail, Phone, CheckCircle2, Package, Flame, ChevronRight,
+  Lock, Calendar, Hash
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
-// ── Validation helpers ──────────────────────────────────────
+// ── Validation helpers ──────────────────────────────────────────
 const validators = {
-  required: v => v.trim().length > 0 || 'Este campo es obligatorio.',
-  email: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) || 'Ingresá un email válido.',
-  phone: v => /^\+?[\d\s\-()]{7,15}$/.test(v.trim()) || 'Ingresá un teléfono válido.',
-  postalCode: v => /^\d{4,10}$/.test(v.trim()) || 'Ingresá un código postal válido.',
-  number: v => /^\d+$/.test(v.trim()) || 'Solo se permiten números.',
+  required:   v => v.trim().length > 0 ? '' : 'Este campo es obligatorio.',
+  email:      v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? '' : 'Ingresá un email válido.',
+  phone:      v => /^\+?[\d\s\-()]{7,15}$/.test(v.trim()) ? '' : 'Ingresá un teléfono válido.',
+  postalCode: v => /^\d{4,10}$/.test(v.trim()) ? '' : 'Ingresá un código postal válido.',
+  number:     v => /^\d+$/.test(v.trim()) ? '' : 'Solo se permiten números.',
+  cardNumber: v => /^\d{13,19}$/.test(v.replace(/\s/g, '')) ? '' : 'Número de tarjeta inválido.',
+  cardExpiry: v => /^(0[1-9]|1[0-2])\/\d{2}$/.test(v.trim()) ? '' : 'Formato MM/AA requerido.',
+  cardCVV:    v => /^\d{3,4}$/.test(v.trim()) ? '' : 'CVV inválido.',
 };
 
-function validate(name, value, deliveryMethod) {
-  if (name === 'nombre')    return validators.required(value);
-  if (name === 'apellido')  return validators.required(value);
-  if (name === 'email')     return validators.email(value) === true ? '' : validators.email(value);
-  if (name === 'telefono')  return validators.phone(value) === true ? '' : validators.phone(value);
-  if (name === 'calle')     return deliveryMethod === 'domicilio' ? (validators.required(value) === true ? '' : validators.required(value)) : '';
-  if (name === 'altura')    return deliveryMethod === 'domicilio' ? (validators.number(value) === true ? '' : validators.number(value)) : '';
-  if (name === 'codigoPostal') return deliveryMethod === 'domicilio' ? (validators.postalCode(value) === true ? '' : validators.postalCode(value)) : '';
-  return '';
+function validate(name, value, deliveryMethod, paymentMethod) {
+  switch (name) {
+    case 'nombre':       return validators.required(value);
+    case 'apellido':     return validators.required(value);
+    case 'email':        return validators.email(value);
+    case 'telefono':     return validators.phone(value);
+    case 'calle':        return deliveryMethod === 'domicilio' ? validators.required(value) : '';
+    case 'altura':       return deliveryMethod === 'domicilio' ? validators.number(value) : '';
+    case 'codigoPostal': return deliveryMethod === 'domicilio' ? validators.postalCode(value) : '';
+    case 'cardNumber':   return (paymentMethod === 'debito' || paymentMethod === 'credito') ? validators.cardNumber(value) : '';
+    case 'cardName':     return (paymentMethod === 'debito' || paymentMethod === 'credito') ? validators.required(value) : '';
+    case 'cardExpiry':   return (paymentMethod === 'debito' || paymentMethod === 'credito') ? validators.cardExpiry(value) : '';
+    case 'cardCVV':      return (paymentMethod === 'debito' || paymentMethod === 'credito') ? validators.cardCVV(value) : '';
+    default:             return '';
+  }
 }
 
 const PaymentOption = ({ id, value, current, onChange, icon: Icon, label }) => (
@@ -53,6 +63,18 @@ const PaymentOption = ({ id, value, current, onChange, icon: Icon, label }) => (
   </label>
 );
 
+// Format card number with spaces every 4 digits
+function formatCardNumber(value) {
+  return value.replace(/\D/g, '').slice(0, 19).replace(/(.{4})/g, '$1 ').trim();
+}
+
+// Format expiry MM/AA
+function formatExpiry(value) {
+  const digits = value.replace(/\D/g, '').slice(0, 4);
+  if (digits.length >= 3) return digits.slice(0, 2) + '/' + digits.slice(2);
+  return digits;
+}
+
 export default function Checkout({ onBack, onSuccess }) {
   const { cart, subtotal, clearCart } = useCart();
 
@@ -61,6 +83,7 @@ export default function Checkout({ onBack, onSuccess }) {
   const [form, setForm] = useState({
     nombre: '', apellido: '', email: '',
     telefono: '', calle: '', altura: '', codigoPostal: '',
+    cardNumber: '', cardName: '', cardExpiry: '', cardCVV: '',
   });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
@@ -70,34 +93,54 @@ export default function Checkout({ onBack, onSuccess }) {
   const total = subtotal + shippingCost;
 
   const handleChange = (field, value) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    // Format card fields on the fly
+    let formatted = value;
+    if (field === 'cardNumber') formatted = formatCardNumber(value);
+    if (field === 'cardExpiry') formatted = formatExpiry(value);
+    if (field === 'cardCVV')    formatted = value.replace(/\D/g, '').slice(0, 4);
+
+    setForm(prev => ({ ...prev, [field]: formatted }));
     if (touched[field]) {
-      const err = validate(field, value, deliveryMethod);
+      const err = validate(field, formatted, deliveryMethod, paymentMethod);
       setErrors(prev => ({ ...prev, [field]: err }));
     }
   };
 
   const handleBlur = (field) => {
     setTouched(prev => ({ ...prev, [field]: true }));
-    const err = validate(field, form[field], deliveryMethod);
+    const err = validate(field, form[field], deliveryMethod, paymentMethod);
     setErrors(prev => ({ ...prev, [field]: err }));
+  };
+
+  const handlePaymentChange = (method) => {
+    setPaymentMethod(method);
+    // Clear card errors if switching away from card
+    if (method !== 'debito' && method !== 'credito') {
+      setErrors(prev => {
+        const { cardNumber, cardName, cardExpiry, cardCVV, ...rest } = prev;
+        return rest;
+      });
+    }
   };
 
   const validateAll = () => {
     const fields = ['nombre', 'apellido', 'email', 'telefono'];
     if (deliveryMethod === 'domicilio') fields.push('calle', 'altura', 'codigoPostal');
+    if (paymentMethod === 'debito' || paymentMethod === 'credito') {
+      fields.push('cardNumber', 'cardName', 'cardExpiry', 'cardCVV');
+    }
 
     const newErrors = {};
     const newTouched = {};
 
     fields.forEach(f => {
       newTouched[f] = true;
-      const err = validate(f, form[f], deliveryMethod);
+      const err = validate(f, form[f], deliveryMethod, paymentMethod);
       if (err) newErrors[f] = err;
     });
 
-    if (!paymentMethod)   newErrors._payment  = 'Seleccioná un método de pago.';
-    if (!deliveryMethod)  newErrors._delivery = 'Seleccioná un método de entrega.';
+    if (!paymentMethod)  newErrors._payment  = 'Seleccioná un método de pago.';
+    if (!deliveryMethod) newErrors._delivery = 'Seleccioná un método de entrega.';
 
     setErrors(newErrors);
     setTouched(newTouched);
@@ -151,6 +194,8 @@ export default function Checkout({ onBack, onSuccess }) {
     );
   }
 
+  const isCard = paymentMethod === 'debito' || paymentMethod === 'credito';
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 animate-fade-in-up">
       {/* Back button */}
@@ -176,11 +221,101 @@ export default function Checkout({ onBack, onSuccess }) {
               Método de Pago
             </h2>
             <div className="grid sm:grid-cols-3 gap-3">
-              <PaymentOption id="pay-transfer" value="transferencia" current={paymentMethod} onChange={setPaymentMethod} icon={Banknote} label="Transferencia" />
-              <PaymentOption id="pay-debit" value="debito" current={paymentMethod} onChange={setPaymentMethod} icon={CreditCard} label="Tarjeta de Débito" />
-              <PaymentOption id="pay-credit" value="credito" current={paymentMethod} onChange={setPaymentMethod} icon={Building2} label="Tarjeta de Crédito" />
+              <PaymentOption id="pay-transfer" value="transferencia" current={paymentMethod} onChange={handlePaymentChange} icon={Banknote} label="Transferencia" />
+              <PaymentOption id="pay-debit"    value="debito"        current={paymentMethod} onChange={handlePaymentChange} icon={CreditCard} label="Tarjeta de Débito" />
+              <PaymentOption id="pay-credit"   value="credito"       current={paymentMethod} onChange={handlePaymentChange} icon={Building2}  label="Tarjeta de Crédito" />
             </div>
             {errors._payment && <p className="text-fire-red text-xs mt-3 animate-fade-in">⚠ {errors._payment}</p>}
+
+            {/* Card Fields */}
+            {isCard && (
+              <div className="mt-6 animate-fade-in-up border-t border-dark-600 pt-6 space-y-4">
+                <h3 className="font-medium text-earth-200 text-sm flex items-center gap-2">
+                  <Lock size={15} className="text-fire-orange" />
+                  Datos de la tarjeta
+                </h3>
+                <div className="grid gap-4">
+                  {/* Card Number */}
+                  <div>
+                    <label className="text-xs text-earth-400 block mb-1.5">Número de tarjeta <span className="text-fire-red">*</span></label>
+                    <div className="relative">
+                      <Hash size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-earth-500" />
+                      <input
+                        type="text"
+                        value={form.cardNumber}
+                        onChange={e => handleChange('cardNumber', e.target.value)}
+                        onBlur={() => handleBlur('cardNumber')}
+                        placeholder="1234 5678 9012 3456"
+                        maxLength={23}
+                        className={`input-field pl-9 font-mono tracking-widest ${errors.cardNumber ? 'border-fire-red' : ''}`}
+                      />
+                    </div>
+                    {errors.cardNumber && <p className="text-fire-red text-xs mt-1">{errors.cardNumber}</p>}
+                  </div>
+
+                  {/* Card Name */}
+                  <div>
+                    <label className="text-xs text-earth-400 block mb-1.5">Nombre en la tarjeta <span className="text-fire-red">*</span></label>
+                    <div className="relative">
+                      <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-earth-500" />
+                      <input
+                        type="text"
+                        value={form.cardName}
+                        onChange={e => handleChange('cardName', e.target.value)}
+                        onBlur={() => handleBlur('cardName')}
+                        placeholder="JUAN GARCIA"
+                        className={`input-field pl-9 uppercase ${errors.cardName ? 'border-fire-red' : ''}`}
+                      />
+                    </div>
+                    {errors.cardName && <p className="text-fire-red text-xs mt-1">{errors.cardName}</p>}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Expiry */}
+                    <div>
+                      <label className="text-xs text-earth-400 block mb-1.5">Vencimiento <span className="text-fire-red">*</span></label>
+                      <div className="relative">
+                        <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-earth-500" />
+                        <input
+                          type="text"
+                          value={form.cardExpiry}
+                          onChange={e => handleChange('cardExpiry', e.target.value)}
+                          onBlur={() => handleBlur('cardExpiry')}
+                          placeholder="MM/AA"
+                          maxLength={5}
+                          className={`input-field pl-9 font-mono ${errors.cardExpiry ? 'border-fire-red' : ''}`}
+                        />
+                      </div>
+                      {errors.cardExpiry && <p className="text-fire-red text-xs mt-1">{errors.cardExpiry}</p>}
+                    </div>
+
+                    {/* CVV */}
+                    <div>
+                      <label className="text-xs text-earth-400 block mb-1.5">CVV <span className="text-fire-red">*</span></label>
+                      <div className="relative">
+                        <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-earth-500" />
+                        <input
+                          type="password"
+                          value={form.cardCVV}
+                          onChange={e => handleChange('cardCVV', e.target.value)}
+                          onBlur={() => handleBlur('cardCVV')}
+                          placeholder="•••"
+                          maxLength={4}
+                          className={`input-field pl-9 font-mono ${errors.cardCVV ? 'border-fire-red' : ''}`}
+                        />
+                      </div>
+                      {errors.cardCVV && <p className="text-fire-red text-xs mt-1">{errors.cardCVV}</p>}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Security note */}
+                <div className="flex items-center gap-2 text-xs text-earth-500 bg-dark-700/50 rounded-lg px-3 py-2">
+                  <Lock size={12} className="text-emerald-500 flex-shrink-0" />
+                  Tus datos están protegidos con encriptación SSL de 256 bits.
+                </div>
+              </div>
+            )}
           </section>
 
           {/* Delivery Method */}
